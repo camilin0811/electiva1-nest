@@ -1,95 +1,56 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 
-interface producto {
-    id: string;
-    nombre: string;
-    categoria: string;
-    precio: number;
-    expiracion: string;
+interface Product {
+    id: number;
+    name: string;
+    price: number;
+    stock: number;
+    expirationDate: string;
+    category: string;
 }
 
-@Controller('productos')
+@Controller('products')
 export class ProductosController {
 
-    private productos: producto[] = [
-        { id: '1',
-            nombre: 'Leche entera',
-            categoria: 'lacteos',
-            precio: 4500,
-            expiracion: '2026-09-20' },
-        { id: '2',
-            nombre: 'Queso campesino',
-            categoria: 'lacteos',
-            precio: 12000,
-            expiracion: '2026-09-15' },
-        { id: '3',
-            nombre: 'Yogurt de fresa',
-            categoria: 'lacteos',
-            precio: 3800,
-            expiracion: '2026-10-05' },
-        { id: '4',
-            nombre: 'Pan tajado',
-            categoria: 'panaderia',
-            precio: 6200,
-            expiracion: '2026-09-10' },
-        { id: '5',
-            nombre: 'Croissant',
-            categoria: 'panaderia',
-            precio: 2500,
-            expiracion: '2026-09-06' },
-        { id: '6',
-            nombre: 'Manzana roja',
-            categoria: 'frutas',
-            precio: 1500,
-            expiracion: '2026-09-18' },
-        { id: '7',
-            nombre: 'Banano',
-            categoria: 'frutas',
-            precio: 900,
-            expiracion: '2026-09-12' },
-        { id: '8',
-            nombre: 'Pechuga de pollo',
-            categoria: 'carnes',
-            precio: 18000,
-            expiracion: '2026-09-08' },
-        { id: '9',
-            nombre: 'Carne molida',
-            categoria: 'carnes',
-            precio: 22000,
-            expiracion: '2026-09-08' },
-        { id: '10',
-            nombre: 'Arroz blanco',
-            categoria: 'granos',
-            precio: 5400,
-            expiracion: '2027-03-30' }
-    ]
+    private products: Product[] = [
+        { id: 1, name: '1 Leche Entera', price: 10, stock: 10, expirationDate: '2026-08-25', category: 'Lácteos' },
+        { id: 2, name: '2 Yogurt Natural', price: 20, stock: 0, expirationDate: '2026-09-01', category: 'Lácteos' },
+        { id: 3, name: '3 Queso Blanco', price: 30, stock: 30, expirationDate: '2026-09-15', category: 'Lácteos' },
+        { id: 4, name: '4 Manzanas x Kg', price: 40, stock: 0, expirationDate: '2026-10-10', category: 'Frutas' },
+        { id: 5, name: '5 Bananos x Kg', price: 50, stock: 50, expirationDate: '2026-08-30', category: 'Frutas' },
+        { id: 6, name: '6 Pan Integral', price: 60, stock: 60, expirationDate: '2026-09-02', category: 'Panadería' },
+        { id: 7, name: '7 Harina Trigo', price: 70, stock: 0, expirationDate: '2026-12-01', category: 'Panadería' },
+        { id: 8, name: '8 Arroz x Kg', price: 80, stock: 80, expirationDate: '2027-03-20', category: 'Granos' },
+        { id: 9, name: '9 Frijoles x Kg', price: 90, stock: 15, expirationDate: '2026-07-14', category: 'Granos' },
+        { id: 10, name: '10 Aceite Cocina', price: 100, stock: 100, expirationDate: '2027-06-30', category: 'Abarrotes' },
+    ];
 
     @Get('')
-    getAllProductos() {
-        return this.productos;
+    getProducts() {
+        return this.products;
     }
 
-    @Get('expiracion/:fecha')
-    getProductosByExpiracion(@Param('fecha') fecha: string) {
-        console.log('.:: Fecha de expiracion', fecha)
-        const data = this.productos.filter((producto) => producto.expiracion === fecha);
-        console.log('.:: Productos encontrados', data.length)
-        return data;
+    // Nota: 'out-of-stock' y 'expired' deben ir ANTES de ':id'
+    @Get('out-of-stock')
+    getOutOfStock() {
+        return this.products.filter(product => product.stock === 0);
     }
 
-    @Get('categoria/:categoria')
-    getProductosByCategoria(@Param('categoria') categoria: string) {
-        console.log('.:: Categoria', categoria)
-        const data = this.productos.filter((producto) => producto.categoria === categoria);
-        console.log('.:: Productos encontrados', data.length)
-        return data;
+    @Get('expired')
+    getExpiredProducts() {
+        const today = new Date();
+        return this.products.filter(product => new Date(product.expirationDate) < today);
     }
 
     @Get(':id')
-    getProductoById(@Param('id') id: string) {
-        console.log('.:: Producto ID', id)
-        const producto = this.productos.find((producto) => producto.id === id);
-        console.log('.:: Producto encontrado', producto)
-        return producto;
+    getProductById(@Param('id') id: string) {
+        return this.products.find(product => product.id === Number(id));
+    }
+
+    @Get('category/:category')
+    getProductsByCategory(@Param('category') category: string) {
+        return this.products.filter(
+            product => product.category.toLowerCase() === category.toLowerCase()
+        );
     }
 }
